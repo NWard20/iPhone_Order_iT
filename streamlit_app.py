@@ -6,7 +6,8 @@ Developer: Nick Ward
 import streamlit as st
 import datetime
 import os
-from Copy_iPhone_Order_iT.iphone_order import IPhoneOrder
+
+from Copy_iPhone_Order_iT import IPhoneOrder
 
 # File paths
 DATA_FILE = "Copy_iPhone_Order_iT/order_history.txt"
@@ -45,10 +46,19 @@ def load_menu():
                 if ";" in line:
                     key, values = line.split(";")
                     key = key.strip()
-                    values = [v.strip() for v in values.split(",")]
+                    values = [v.strip() for v in values.split(",") if v.strip()]
                     menu[key] = values
     except FileNotFoundError:
         st.error(f"Menu file not found: {MENU_FILE}")
+        return {}
+    except Exception as e:
+        st.error(f"Error loading menu: {e}")
+        return {}
+    
+    if not menu:
+        st.error("Menu is empty! Check menu.txt format")
+        return {}
+    
     return menu
 
 
