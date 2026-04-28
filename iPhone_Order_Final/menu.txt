@@ -1,0 +1,7 @@
+MODEL ; Standard, Plus, Pro, Pro Max
+STORAGE ; 128GB, 256GB, 512GB, 1 1TB
+COLOR ; Black, Silver, Blue, Gold, Purple
+APPLECARE ; Yes, No
+CHARGER ; Yes, No
+
+

@@ -1,0 +1,20 @@
+
+[2026-04-06 22:18:19] ORDER RECORD
+Customer: Nick
+Model: Standard
+Storage: 128GB
+Color: Black
+Applecare: Yes
+Charger: No
+Total: $998.00
+-----------------------------
+
+[2026-04-06 22:20:12] ORDER RECORD
+Customer: Nick Ward
+Model: Pro
+Storage: 256GB
+Color: Black
+Applecare: Yes
+Charger: Yes
+Total: $1327.00
+-----------------------------
