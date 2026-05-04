@@ -7,12 +7,10 @@ import streamlit as st
 import datetime
 import os
 
-from iphone_order import IPhoneOrder
-
 # File paths
-DATA_FILE = "Copy_iPhone_Order_iT/order_history.txt"
-MENU_FILE = "Copy_iPhone_Order_iT/menu.txt"
-HUMAN_REPORT = "Copy_iPhone_Order_iT/latest_receipt.txt"
+DATA_FILE = "order_history.txt"
+MENU_FILE = "menu.txt"
+HUMAN_REPORT = "latest_receipt.txt"
 
 # Pricing configuration
 PRICES = {
@@ -392,3 +390,4 @@ if st.session_state.user_logged_in:
 else:
     st.title("📱 iPhone Order System")
     st.info("Please login or create an account to get started!")
+
