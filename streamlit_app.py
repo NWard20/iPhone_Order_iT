@@ -7,7 +7,7 @@ import streamlit as st
 import datetime
 import os
 
-from Copy_iPhone_Order_iT import IPhoneOrder
+from iphone_order import IPhoneOrder
 
 # File paths
 DATA_FILE = "Copy_iPhone_Order_iT/order_history.txt"
