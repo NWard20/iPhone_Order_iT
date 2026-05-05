@@ -143,13 +143,6 @@ This usability testing report documents the findings from 5 diverse user persona
 ### Issue #1: Limited Order Management Scope
 **Friction Point:** Users could only update/delete the most recent order.
 
-**User Quotes:**
-- *Sarah:* "Wait, I can't fix my first order? But I made a mistake on the storage size!"
-- *Patricia:* "Why can't I delete that? It's my order. Just because it's not the newest?"
-- *James:* "This is useless for managing multiple orders. I need full control."
-
-**Impact:** 60% of test users expected to modify any order, not just the latest.
-
 ---
 
 ### Issue #2: Weak Input Validation
@@ -161,23 +154,10 @@ This usability testing report documents the findings from 5 diverse user persona
 - Address: "123 Main" ✗ (Marcus)
 - Address: "" ✗ (Caught by empty check but no format check)
 
-**User Quotes:**
-- *Emma:* "That's not even a phone number... why did it let me enter that?"
-- *Marcus:* "I'm worried my order won't be delivered because the address is wrong."
-
-**Impact:** 60% of orders contained validation errors that would fail in production.
-
 ---
 
 ### Issue #3: No Account Persistence
 **Friction Point:** Users lost login credentials after each session.
-
-**User Quotes:**
-- *Patricia:* "Do I have to remember this every time? Can't it save my name?"
-- *James:* "This isn't secure and it's not practical. Where's my account?"
-
-**Impact:** 40% of users felt the system was unreliable and incomplete.
-
 ---
 
 ## Part 3: The Transformation - Before & After
@@ -284,32 +264,4 @@ All three fixes have been implemented in the refactored `streamlit_app.py`. The 
    - Both operations use dynamic index selection
 
 ---
-
-## Testing Results Summary
-
-| Persona | Issue 1 | Issue 2 | Issue 3 | Overall Experience |
-|---------|---------|---------|---------|-------------------|
-| Sarah (Professional) | ✗ Fixed | ✗ Fixed | N/A | **Excellent** |
-| Marcus (First-Timer) | ✓ N/A | ✗ Fixed | ✓ N/A | **Very Good** |
-| Patricia (Skeptic) | ✗ Fixed | ✗ Fixed | ✗ Fixed | **Good** |
-| James (Power User) | ✗ Fixed | ✓ N/A | ✗ Fixed | **Excellent** |
-| Emma (Mobile User) | ✓ N/A | ✗ Fixed | ✓ N/A | **Very Good** |
-
-**Post-Refactor Satisfaction:** 5/5 personas reported significant improvement
-
----
-
-## Recommendations for Future Iterations
-
-1. **Search & Filter** - Add order search by customer name or date
-2. **Account Recovery** - Implement password/phone-based account recovery
-3. **Email Notifications** - Send order confirmations to email
-4. **Order Status Tracking** - Add "Processing," "Shipped," "Delivered" states
-5. **Mobile Optimization** - Create mobile-specific UI improvements
-6. **Export Orders** - Allow PDF/CSV export of order history
-
----
-
-**Conclusion:**  
-The usability testing revealed three critical pain points that severely limited the app's functionality. All three issues have been addressed through code refactoring and enhanced validation. The iPhone Order System is now a robust, user-friendly order management platform suitable for both casual users and power users.
 
