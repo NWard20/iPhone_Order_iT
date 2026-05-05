@@ -8,9 +8,10 @@ import datetime
 import os
 
 # File paths
-DATA_FILE = "order_history.txt"
-MENU_FILE = "menu.txt"
-HUMAN_REPORT = "latest_receipt.txt"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(SCRIPT_DIR, "order_history.txt")
+MENU_FILE = os.path.join(SCRIPT_DIR, "menu.txt")
+HUMAN_REPORT = os.path.join(SCRIPT_DIR, "latest_receipt.txt")
 
 # Pricing configuration
 PRICES = {
