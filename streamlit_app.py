@@ -390,4 +390,3 @@ if st.session_state.user_logged_in:
 else:
     st.title("📱 iPhone Order System")
     st.info("Please login or create an account to get started!")
-
