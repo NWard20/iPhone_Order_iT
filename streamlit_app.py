@@ -6,12 +6,15 @@ Developer: Nick Ward
 import streamlit as st
 import datetime
 import os
+import json
+import re
 
 # File paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(SCRIPT_DIR, "order_history.txt")
 MENU_FILE = os.path.join(SCRIPT_DIR, "menu.txt")
 HUMAN_REPORT = os.path.join(SCRIPT_DIR, "latest_receipt.txt")
+USER_FILE = os.path.join(SCRIPT_DIR, "users.json")
 
 # Pricing configuration
 PRICES = {
@@ -35,6 +38,61 @@ ADDON_PRICES = {
 
 
 # ======================== HELPER FUNCTIONS ========================
+
+# ---- INPUT VALIDATION FUNCTIONS ----
+
+def validate_phone(phone):
+    """Validate phone number format (XXX-XXX-XXXX or 10 digits)"""
+    pattern = r'^\d{3}-\d{3}-\d{4}$|^\d{10}$'
+    return bool(re.match(pattern, phone.strip()))
+
+
+def validate_address(address):
+    """Validate address has minimum requirements"""
+    address = address.strip()
+    return len(address) >= 10 and ',' in address
+
+
+# ---- USER PERSISTENCE FUNCTIONS ----
+
+def user_exists(phone_number):
+    """Check if phone number already has an account"""
+    try:
+        if os.path.exists(USER_FILE):
+            with open(USER_FILE, "r") as f:
+                users = json.load(f)
+                return any(u['phone'] == phone_number for u in users)
+    except:
+        pass
+    return False
+
+
+def save_user(first_name, last_name, phone_number):
+    """Save user account to users.json"""
+    try:
+        users = json.load(open(USER_FILE, "r")) if os.path.exists(USER_FILE) else []
+    except:
+        users = []
+    
+    if not any(u['phone'] == phone_number for u in users):
+        users.append({'first': first_name, 'last': last_name, 'phone': phone_number})
+        with open(USER_FILE, "w") as f:
+            json.dump(users, f, indent=2)
+
+
+def load_user(phone_number):
+    """Load user data by phone number"""
+    try:
+        if os.path.exists(USER_FILE):
+            with open(USER_FILE, "r") as f:
+                users = json.load(f)
+                for u in users:
+                    if u['phone'] == phone_number:
+                        return u
+    except:
+        pass
+    return None
+
 
 def load_menu():
     """Return menu options"""
@@ -183,35 +241,44 @@ if not st.session_state.user_logged_in:
         st.subheader("Login")
         login_first = st.text_input("First Name", key="login_first")
         login_last = st.text_input("Last Name", key="login_last")
-        login_phone = st.text_input("Phone Number", key="login_phone")
+        login_phone = st.text_input("Phone Number (e.g., 123-456-7890)", key="login_phone")
         
         if st.button("Login"):
-            if login_first and login_last and login_phone:
+            if not login_first or not login_last or not login_phone:
+                st.error("Please fill in all fields")
+            elif not validate_phone(login_phone):
+                st.error("Please enter a valid phone number (e.g., 123-456-7890 or 1234567890)")
+            elif not user_exists(login_phone):
+                st.error(f"No account found for {login_phone}. Please create an account first.")
+            else:
                 st.session_state.user_logged_in = True
                 st.session_state.user_first_name = login_first.title()
                 st.session_state.user_last_name = login_last.title()
                 st.session_state.user_phone_number = login_phone
                 st.success(f"Welcome, {st.session_state.user_first_name}!")
                 st.rerun()
-            else:
-                st.error("Please fill in all fields")
     
     with tab2:
         st.subheader("Create Account")
         create_first = st.text_input("First Name", key="create_first")
         create_last = st.text_input("Last Name", key="create_last")
-        create_phone = st.text_input("Phone Number", key="create_phone")
+        create_phone = st.text_input("Phone Number (e.g., 123-456-7890)", key="create_phone")
         
         if st.button("Create Account"):
-            if create_first and create_last and create_phone:
+            if not create_first or not create_last or not create_phone:
+                st.error("Please fill in all fields")
+            elif not validate_phone(create_phone):
+                st.error("Please enter a valid phone number (e.g., 123-456-7890 or 1234567890)")
+            elif user_exists(create_phone):
+                st.error(f"An account already exists for {create_phone}. Please login instead.")
+            else:
+                save_user(create_first.title(), create_last.title(), create_phone)
                 st.session_state.user_logged_in = True
                 st.session_state.user_first_name = create_first.title()
                 st.session_state.user_last_name = create_last.title()
                 st.session_state.user_phone_number = create_phone
                 st.success(f"Account created! Welcome, {st.session_state.user_first_name}!")
                 st.rerun()
-            else:
-                st.error("Please fill in all fields")
 else:
     st.sidebar.write(f"**Logged in as:**")
     st.sidebar.write(f"{st.session_state.user_first_name} {st.session_state.user_last_name}")
@@ -245,8 +312,8 @@ if st.session_state.user_logged_in:
             with col2:
                 order_last_name = st.text_input("Last Name", st.session_state.user_last_name)
             
-            order_phone_num = st.text_input("Phone Number", st.session_state.user_phone_number)
-            order_address = st.text_input("Shipping Address")
+            order_phone_num = st.text_input("Phone Number (e.g., 123-456-7890)", st.session_state.user_phone_number)
+            order_address = st.text_input("Shipping Address (include city, e.g., '123 Main St, Boston, MA')")
             
             st.write("**iPhone Configuration**")
             col1, col2 = st.columns(2)
@@ -274,6 +341,10 @@ if st.session_state.user_logged_in:
                 # Validation
                 if not order_first_name or not order_last_name or not order_phone_num or not order_address:
                     st.error("Please fill in all customer information fields")
+                elif not validate_phone(order_phone_num):
+                    st.error("Please enter a valid phone number (e.g., 123-456-7890 or 1234567890)")
+                elif not validate_address(order_address):
+                    st.error("Please enter a complete address (at least 10 characters, include city)")
                 else:
                     save_order(
                         order_first_name.title(),
@@ -317,14 +388,18 @@ if st.session_state.user_logged_in:
     
     # ======================== TAB 3: UPDATE ORDER ========================
     with tab_update:
-        st.subheader("Update Most Recent Order")
+        st.subheader("Update Order")
         
-        recent = get_recent_orders(1)
+        all_orders = load_orders()
         
-        if not recent:
+        if not all_orders:
             st.info("No orders to update")
         else:
-            order = recent[0]
+            # Create order selection dropdown
+            order_options = [f"{o['timestamp']} - {o['first_name']} {o['last_name']} ({o['model']})" for o in all_orders]
+            selected_order_idx = st.selectbox("Select Order to Update", range(len(all_orders)), format_func=lambda i: order_options[i])
+            
+            order = all_orders[selected_order_idx]
             st.write(f"**Updating:** {order['first_name']} {order['last_name']} - {order['timestamp']}")
             
             with st.form("update_order_form"):
@@ -348,18 +423,22 @@ if st.session_state.user_logged_in:
                 update_submit = st.form_submit_button("Update Order")
                 
                 if update_submit:
-                    update_order(0, update_model, update_storage, update_color, update_applecare, update_charger)
+                    update_order(selected_order_idx, update_model, update_storage, update_color, update_applecare, update_charger)
     
     # ======================== TAB 4: DELETE ORDER ========================
     with tab_delete:
-        st.subheader("Delete Most Recent Order")
+        st.subheader("Delete Order")
         
-        recent = get_recent_orders(1)
+        all_orders = load_orders()
         
-        if not recent:
+        if not all_orders:
             st.info("No orders to delete")
         else:
-            order = recent[0]
+            # Create order selection dropdown
+            order_options = [f"{o['timestamp']} - {o['first_name']} {o['last_name']} ({o['model']})" for o in all_orders]
+            selected_order_idx = st.selectbox("Select Order to Delete", range(len(all_orders)), format_func=lambda i: order_options[i])
+            
+            order = all_orders[selected_order_idx]
             st.warning(f"⚠️ Are you sure you want to delete this order?")
             st.write(f"**Customer:** {order['first_name']} {order['last_name']}")
             st.write(f"**Model:** {order['model']} - {order['storage']} - {order['color']}")
@@ -369,7 +448,7 @@ if st.session_state.user_logged_in:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("Confirm Delete", type="secondary"):
-                    delete_order(0)
+                    delete_order(selected_order_idx)
                     st.rerun()
             with col2:
                 st.write("Or go back to cancel")
