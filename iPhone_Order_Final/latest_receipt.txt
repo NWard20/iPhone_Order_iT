@@ -1,9 +1,0 @@
-Receipt - 2026-04-21 13:54:16
-Nick | 
-model: 
-storage: 
-color: 
-applecare: 
-charger: 
-Total: $999.00
-------------------
